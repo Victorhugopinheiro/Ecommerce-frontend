@@ -1,15 +1,17 @@
 import Link from "next/link";
 
 type BrandMarkProps = {
+  tabIndex?: -1;
   onNavigate?: () => void;
 };
 
-export function BrandMark({ onNavigate }: BrandMarkProps) {
+export function BrandMark({ tabIndex, onNavigate }: BrandMarkProps) {
   return (
     <Link
       id="brand-mark"
       href="/"
       aria-label="Caverna do Nerd"
+      tabIndex={tabIndex}
       onClick={onNavigate}
       className="inline-flex shrink-0 rounded-sm outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-promo"
     >

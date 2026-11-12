@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useId, useState, type FormEvent } from "react";
+import { useId } from "react";
 import { normalizeSearchTerm } from "@/lib/navigation";
 import { SearchIcon } from "./icons";
 
@@ -19,15 +19,9 @@ export function SearchForm({ onValidSearch }: SearchFormProps) {
   const searchParams = useSearchParams();
   const termFromUrl =
     pathname === "/buscar" ? (searchParams.get("q") ?? "") : "";
-  const [value, setValue] = useState(termFromUrl);
 
-  useEffect(() => {
-    setValue(termFromUrl);
-  }, [termFromUrl]);
-
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const term = normalizeSearchTerm(value);
+  function handleAction(formData: FormData) {
+    const term = normalizeSearchTerm(String(formData.get("q") ?? ""));
 
     if (!term) {
       return;
@@ -38,14 +32,15 @@ export function SearchForm({ onValidSearch }: SearchFormProps) {
   }
 
   return (
-    <form role="search" onSubmit={handleSubmit} className="relative w-full">
+    <form action={handleAction} role="search" className="relative w-full">
       <label htmlFor={inputId} className="sr-only">
         Buscar produtos
       </label>
       <input
+        key={termFromUrl}
         id={inputId}
-        value={value}
-        onChange={(event) => setValue(event.target.value)}
+        name="q"
+        defaultValue={termFromUrl}
         placeholder="Buscar produtos..."
         className={fieldClassName}
       />

@@ -26,16 +26,16 @@ export function CartLink({
         showLabel ? `${iconLinkClassName} w-auto gap-2 px-3` : iconLinkClassName
       }
     >
-      <CartIcon className="size-6" />
-      {showLabel ? (
-        <span className="text-sm font-medium">Carrinho</span>
-      ) : null}
-      {hasItems ? (
-        <span
-          aria-hidden="true"
-          className="absolute top-1.5 right-1.5 size-2.5 rounded-full bg-promo ring-2 ring-header"
-        />
-      ) : null}
+      <span className="relative inline-flex">
+        <CartIcon className="size-6" />
+        {hasItems ? (
+          <span
+            aria-hidden="true"
+            className="absolute -top-1 -right-1 size-2.5 rounded-full bg-promo ring-2 ring-header"
+          />
+        ) : null}
+      </span>
+      {showLabel ? <span className="text-sm font-medium">Carrinho</span> : null}
     </Link>
   );
 }

@@ -64,7 +64,9 @@ function CategoryList({
                 aria-current={isActive ? "page" : undefined}
                 onClick={onNavigate}
                 className={`${linkClassName} ${
-                  layout === "stack" ? "flex px-2 py-3" : "inline-flex"
+                  layout === "stack"
+                    ? "flex min-h-11 w-full items-center px-2"
+                    : "inline-flex"
                 } ${isActive ? "underline decoration-2 underline-offset-8" : ""}`}
               >
                 {category.label}
