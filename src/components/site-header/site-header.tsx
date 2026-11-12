@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { AccountLink } from "./account-link";
 import { BrandMark } from "./brand-mark";
 import { CartLink } from "./cart-link";
+import { CategoryNav, CategoryNavFallback } from "./category-nav";
 import { PromoBar } from "./promo-bar";
 import { SearchForm, SearchFormFallback } from "./search-form";
 
@@ -26,6 +27,9 @@ export function SiteHeader({ hasItems }: SiteHeaderProps) {
             <CartLink hasItems={hasItems} />
           </div>
         </div>
+        <Suspense fallback={<CategoryNavFallback />}>
+          <CategoryNav />
+        </Suspense>
       </div>
     </header>
   );
