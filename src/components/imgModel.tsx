@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import Link from "next/link";
 
 
 interface ImgModelProps {
@@ -19,7 +19,7 @@ function ImgModel({ price, title, url, currency, id, oldPrice, installments = 12
     const priceNumber = Number(price);
     const symbol = currency ? `${currency} ` : "R$ ";
     return (
-        <Link to={`/product/${id}`} className="flex flex-col items-center justify-between gap-2 bg-white p-3 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+        <Link href={`/product/${id}`} className="flex flex-col items-center justify-between gap-2 bg-white p-3 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
             <div className="overflow-hidden">
                 <img className="hover:scale-110 transition ease-in-out" src={url} />
             </div>

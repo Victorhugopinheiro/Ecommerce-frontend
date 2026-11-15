@@ -8,6 +8,14 @@ import img5 from "../../../public/p_img5.png";
 import img6 from "../../../public/p_img6.png";
 import img7 from "../../../public/p_img7.png";
 import img8 from "../../../public/p_img8.png";
+import gtaCamiseta from "../../../public/gtaImageShirt.jpg";
+import gtaLuminaria from "../../../public/luminariaImagemGta.jpg";
+import gtaActionFigures from "../../../public/imagemActionFigure.jpg";
+import gtaCaneca from "../../../public/imageCanecaGta.jpg";
+import gtaCapinha from "../../../public/imagemCapinhaGta.jpg";
+import gtaChaveiro from "../../../public/imagemChaveiroGta.jpg";
+
+
 
 const categories = [
     { name: "Roupas e Acessórios", image: img1 },
@@ -18,6 +26,15 @@ const categories = [
     { name: "Canecas", image: img6 },
     { name: "Capinhas e AirPods", image: img7 },
     { name: "Cosplays e Fantasias", image: img8 },
+];
+
+const categories2 = [
+    { name: "Roupas e Acessórios", image: gtaCamiseta },
+    { name: "Luminárias", image: gtaLuminaria },
+    { name: "Action Figures", image: gtaActionFigures },
+    { name: "Canecas", image: gtaCaneca },
+    { name: "Capinhas e AirPods", image: gtaCapinha },
+    { name: "Chaveiro", image: gtaChaveiro },
 ];
 
 
@@ -33,19 +50,19 @@ export default function Categories() {
             </div>
 
             <div className="flex flex-wrap gap-6 overflow-x-auto pb-2 lg:justify-between">
-                {categories.map((category) => (
+                {categories2.map((category) => (
                     <Link
                         key={category.name}
                         href={`/collection/${encodeURIComponent(category.name)}`}
-                        className="group flex flex-col items-center gap-4 shrink-0 w-32 text-center"
+                        className="group flex flex-col items-center gap-4 shrink-0 w-48 text-center"
                     >
-                        <div className="relative w-28 h-28">
-                            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-green-100 to-green-800" />
+                        <div className="relative w-48 h-48">
+                           
 
                             <img
                                 src={category.image.src}
                                 alt={category.name}
-                                className="absolute rounded-full  w-full inset-0 m-auto max-w-[85%] max-h-[110%] object-contain transition-transform duration-300 group-hover:scale-110"
+                                className="absolute   w-full inset-0 m-auto max-w-[85%] max-h-[110%] object-contain transition-transform duration-300 group-hover:scale-110"
                             />
                         </div>
                         <span className="text-sm text-gray-500 group-hover:text-green-900 transition-colors flex flex-col items-center">

@@ -9,12 +9,13 @@ import { ShopContext } from "../../context/ShopContext"
 function LastestsCollections() {
 
     const {  currency, latesteProducts } = useContext(ShopContext)!
+    console.log(latesteProducts)
 
     return (
         <div className="my-8">
 
             <div className="flex justify-center items-center flex-col ">
-                <Tittle title1="ULTIMOS" title2="LANÇAMENTOS" />
+                <Tittle title1="MAIS" title2="VENDIDOS" />
 
                 <p className="text-gray-600 max-w-6/12 text-center">                Descubra as novidades da estação, com peças modernas, confortáveis e prontas para
                                     renovar o seu visual.

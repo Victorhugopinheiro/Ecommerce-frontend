@@ -10,11 +10,13 @@ import {
     CarouselPrevious,
     type CarouselApi,
 } from "@/components/ui/carousel"
+import gtaBanner from "../../../public/bannerGta.jpg";
+import gtaBanner2 from "../../../public/ChooseYourSidee.jpg";
 
 // Add more full-size banner images here to get more slides
 const slides = [
-    { src: "/mainBanner.jfif", mobileSrc: "/ImageMainMobile.jpg", alt: "Recem chegados" },
-    { src: "/mainBanner.jfif", mobileSrc: "/ImageMainMobile.jpg", alt: "Recem chegados" },
+    { src: gtaBanner.src, mobileSrc: "/ImageMainMobile.jpg", alt: "Recem chegados" },
+    { src: gtaBanner2.src, mobileSrc: "/ImageMainMobile.jpg", alt: "Recem chegados" },
     { src: "/mainBanner.jfif", mobileSrc: "/ImageMainMobile.jpg", alt: "Recem chegados" },
 ]
 
