@@ -2,26 +2,14 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-
+import type { Product } from "@/types/mongoose.gen";
 import { toast } from "react-toastify";
 import api from "../service/api";
 import { AuthContext } from "./authContext";
 import axios from "axios";
-
-export interface ProductProps {
-    _id: string;
-    name: string;
-    description: string;
-    price: number;
-    image: string[]; // array de caminhos de imagem
-    category: string;
-    subCategory: string;
-    sizes: string[];
-    date: number;
-    bestseller: boolean;
-
-
-}
+import { useGettingProductsHook } from "@/hooks/gettingProducts";
+import { useGettingProductCartHook } from "@/hooks/GettingProductCart";
+import { useAddProductCartHook } from "@/hooks/AddProductCart";
 
 export interface CartItem {
     productId: string;      // id do produto
@@ -40,13 +28,13 @@ interface ShopContextType {
     feeId: string;
     setFeeId: (feeId: string) => void;
 
-    products?: ProductProps[];
+    products?: Product[];
 
-    latesteProducts?: ProductProps[];
-    setLatestProducts: (currency: ProductProps[]) => void;
+    latesteProducts?: Product[];
+    setLatestProducts: (currency: Product[]) => void;
 
-    bestSallers?: ProductProps[];
-    setBestSallers?: (currency: ProductProps[]) => void;
+    bestSallers?: Product[];
+    setBestSallers?: (currency: Product[]) => void;
 
     search?: string;
     setSearch?: (search: string) => void;
@@ -72,6 +60,9 @@ interface ShopContextType {
     cartToggle: boolean;
     setCartToggle: (toggle: boolean) => void;
 
+    gtaProducts?: Product[];
+    setGtaProducts: (gtaProducts: Product[]) => void;
+
 }
 
 export const ShopContext = createContext<ShopContextType | undefined>(undefined);
@@ -79,22 +70,30 @@ export const ShopContext = createContext<ShopContextType | undefined>(undefined)
 // ...existing code...
 
 export const ShopProvider = ({ children }: { children: React.ReactNode }) => {
-    const {  authenticated } = useContext(AuthContext)!;
+    const { authenticated } = useContext(AuthContext)!;
+
+    const { data: fetchedProducts, isError, refetch } = useGettingProductsHook();
+
+    const { data: fetchedProductCart, isError: isErrorProductCart, refetch: refetchProductCart } = useGettingProductCartHook();
+
+    const { mutate: addToCartMutation, isPending: isPendingAddToCart } = useAddProductCartHook();
 
     const [currency, setCurrency] = useState<string>("R$");
     const [fee, setFee] = useState<string>("0");
     const [feeId, setFeeId] = useState<string>("");
-    const [products, setProducts] = useState<ProductProps[]>([]);
+    const [products, setProducts] = useState<Product[]>([]);
     const [cartToggle, setCartToggle] = useState<boolean>(false);
 
-    const [latesteProducts, setLatestProducts] = useState<ProductProps[]>([]);
-    const [bestSallers, setBestSallers] = useState<ProductProps[]>([]);
+    const [latesteProducts, setLatestProducts] = useState<Product[]>([]);
+    const [bestSallers, setBestSallers] = useState<Product[]>([]);
 
     const [search, setSearch] = useState<string>("");
     const [showSearch, setShowSearch] = useState<boolean>(true);
 
     const [totalValue, setTotalValue] = useState<number>(0)
     const [cart, setCart] = useState<CartItem[]>([]);
+
+    const [gtaProducts, setGtaProducts] = useState<Product[]>([]);
 
     const addToCart = async (item: CartItem) => {
         if (!item.size) {
@@ -107,22 +106,14 @@ export const ShopProvider = ({ children }: { children: React.ReactNode }) => {
             return;
         }
 
-        try {
-            const response = await api.post('/api/cart/add', {
-                productId: item.productId,
-                quantity: item.quantity,
-                size: item.size,
-                name: item.name
-            });
 
-            if (response.data.success) {
-                setCart(response.data.cart);
-                toast.success("Produto adicionado ao carrinho!");
-            }
-        } catch (error: any) {
+        try {
+            void addToCartMutation({ productId: item.productId, quantity: item.quantity, size: item.size, name: item.name });
+
+        } catch (error) {
             toast.error("Erro ao adicionar produto ao carrinho.");
             if (axios.isAxiosError(error) && error.response?.status === 401) {
-               ;
+                ;
             }
         }
     }
@@ -146,7 +137,7 @@ export const ShopProvider = ({ children }: { children: React.ReactNode }) => {
         } catch (error) {
             toast.error("Erro ao remover produto.");
             if (axios.isAxiosError(error) && error.response?.status === 401) {
-               ;
+                ;
             }
         }
     }
@@ -163,53 +154,35 @@ export const ShopProvider = ({ children }: { children: React.ReactNode }) => {
         return total;
     }
 
-    const gettinProducts = async () => {
-        try {
-            const response = await api.get('/api/products/list');
-
-            if (response.data.success) {
-                setProducts(response.data.products);
-                setLatestProducts(response.data.products.slice(0, 10));
-                setBestSallers(response.data.products.filter((product: ProductProps) => product.bestseller).slice(0, 5));
-            }
-        } catch (error) {
-            toast.error("Erro ao carregar produtos.");
-
-        }
-    }
-
-    const getProductsCart = async () => {
-        // Verificações mais rigorosas
-        if (!authenticated) {
-            return;
-        }
-
-        try {
-
-
-            const response = await api.post('/api/cart/items', {}, {
-
-            });
-
-            if (response.data.success) {
-                setCart(response.data.cart || []);
-
-            }
-        } catch (error: unknown) {
-            if (axios.isAxiosError(error)) {
-
-
-                if (error.response?.status === 401) {
-                   ;
-                }
-            }
-        }
+    const gettinProducts = () => {
+        void refetch();
     };
 
-    // Carrega produtos uma vez ao inicializar
+    const getProductsCart = async () => {
+        if (!authenticated) return;
+        void refetchProductCart();
+    }
+
+
     useEffect(() => {
-        gettinProducts();
-    }, []);
+        if (!fetchedProducts) return;
+
+        setProducts(fetchedProducts);
+        setCart(fetchedProductCart || []);
+        setLatestProducts(fetchedProducts.slice(0, 10));
+        setBestSallers(
+            fetchedProducts.filter((product) => product.bestseller).slice(0, 5),
+        );
+        setGtaProducts(fetchedProducts.filter((product) => product.category === "GTAIV").slice(0, 5));
+
+       
+    }, [fetchedProducts, fetchedProductCart]);
+
+    useEffect(() => {
+        if (isError) {
+            toast.error("Erro ao carregar produtos.");
+        }
+    }, [isError]);
 
     useEffect(() => {
         const raw = localStorage.getItem("selectedShipping");
@@ -251,9 +224,10 @@ export const ShopProvider = ({ children }: { children: React.ReactNode }) => {
             search, setSearch, setShowSearch, showSearch,
             cart, setCart, addToCart, removeProduct, totalItems, setTotalValue, totalValue,
             gettinProducts, feeId, setFeeId, cartToggle, setCartToggle,
+            gtaProducts, setGtaProducts,
         }}>
             {children}
         </ShopContext.Provider>
-    );  
+    );
 };
 // ...existing code...
