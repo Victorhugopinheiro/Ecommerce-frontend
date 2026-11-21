@@ -3,7 +3,7 @@ import { HeartHandshakeIcon, Truck, Undo2 } from "lucide-react"
 
 function SecondNavbar() {
     return (
-        <div className="bg-green-700 py-1 flex justify-evenly">
+        <div className="bg-purple-900 py-1 flex justify-evenly">
             <div className="flex items-center gap-2">
                 <p className="text-center text-sm text-white ">Envio grátis para todo o Brasil!</p>
                 <Truck color="white"/>

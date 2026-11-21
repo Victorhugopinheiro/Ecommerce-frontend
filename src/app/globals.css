@@ -9,6 +9,8 @@
   --color-foreground: var(--foreground);
   --color-promo: #1a9f45;
   --color-promo-foreground: #ffffff;
+  --color-highlight: #ff1493;
+  --color-display: #101b35;
   --color-header: #000000;
   --color-header-foreground: #ffffff;
   --color-search: #ffffff;

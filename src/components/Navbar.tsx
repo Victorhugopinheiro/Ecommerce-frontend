@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-import cavernaNerds from '../../public/cavernaNerds.jpg'
+import cavernaNerds from '../../public/LogoGta.jpg'
 import dropdownIcon from '../../public/dropdown_icon.png'
 import { useContext, useState } from 'react'
 import { ShopContext } from '../context/ShopContext'

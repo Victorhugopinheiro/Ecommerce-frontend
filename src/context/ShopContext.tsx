@@ -1,33 +1,19 @@
-
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-
 import { toast } from "react-toastify";
 import api from "../service/api";
 import { AuthContext } from "./authContext";
 import axios from "axios";
-
-export interface ProductProps {
-    _id: string;
-    name: string;
-    description: string;
-    price: number;
-    image: string[]; // array de caminhos de imagem
-    category: string;
-    subCategory: string;
-    sizes: string[];
-    date: number;
-    bestseller: boolean;
-
-
-}
+import { useGettingProductCartHook } from "@/hooks/GettingProductCart";
+import { useAddProductCartHook } from "@/hooks/AddProductCart";
 
 export interface CartItem {
-    productId: string;      // id do produto
-    size: string;           // tamanho selecionado
-    quantity: number;       // quantidade do produto
-    name?: string;          // nome do produto (opcional, pode ser buscado via productId)
+    productId: string;
+    size: string;
+    quantity: number;
+    name?: string;
+    price?: number;
 }
 
 interface ShopContextType {
@@ -40,14 +26,6 @@ interface ShopContextType {
     feeId: string;
     setFeeId: (feeId: string) => void;
 
-    products?: ProductProps[];
-
-    latesteProducts?: ProductProps[];
-    setLatestProducts: (currency: ProductProps[]) => void;
-
-    bestSallers?: ProductProps[];
-    setBestSallers?: (currency: ProductProps[]) => void;
-
     search?: string;
     setSearch?: (search: string) => void;
 
@@ -59,36 +37,41 @@ interface ShopContextType {
 
     addToCart?: (item: CartItem) => void;
 
-
-
     removeProduct?: (productId: string, size: string) => void;
     totalItems?: () => number;
 
     totalValue?: number;
     setTotalValue?: (total: number) => void;
 
-    gettinProducts?: () => void;
-
     cartToggle: boolean;
     setCartToggle: (toggle: boolean) => void;
+}
 
+function sumCartTotal(items: CartItem[]): number {
+    return items.reduce((total, item) => {
+        if (typeof item.price !== "number" || Number.isNaN(item.price)) {
+            return total;
+        }
+        if (typeof item.quantity !== "number" || item.quantity < 1) {
+            return total;
+        }
+        return total + item.price * item.quantity;
+    }, 0);
 }
 
 export const ShopContext = createContext<ShopContextType | undefined>(undefined);
 
-// ...existing code...
-
 export const ShopProvider = ({ children }: { children: React.ReactNode }) => {
-    const {  authenticated } = useContext(AuthContext)!;
+    const { authenticated } = useContext(AuthContext)!;
+
+    const { data: fetchedProductCart, refetch: refetchProductCart } = useGettingProductCartHook(authenticated);
+
+    const { mutate: addToCartMutation } = useAddProductCartHook();
 
     const [currency, setCurrency] = useState<string>("R$");
     const [fee, setFee] = useState<string>("0");
     const [feeId, setFeeId] = useState<string>("");
-    const [products, setProducts] = useState<ProductProps[]>([]);
     const [cartToggle, setCartToggle] = useState<boolean>(false);
-
-    const [latesteProducts, setLatestProducts] = useState<ProductProps[]>([]);
-    const [bestSallers, setBestSallers] = useState<ProductProps[]>([]);
 
     const [search, setSearch] = useState<string>("");
     const [showSearch, setShowSearch] = useState<boolean>(true);
@@ -107,22 +90,14 @@ export const ShopProvider = ({ children }: { children: React.ReactNode }) => {
             return;
         }
 
-        try {
-            const response = await api.post('/api/cart/add', {
-                productId: item.productId,
-                quantity: item.quantity,
-                size: item.size,
-                name: item.name
-            });
 
-            if (response.data.success) {
-                setCart(response.data.cart);
-                toast.success("Produto adicionado ao carrinho!");
-            }
-        } catch (error: any) {
+        try {
+            void addToCartMutation({ productId: item.productId, quantity: item.quantity, size: item.size, name: item.name });
+
+        } catch (error) {
             toast.error("Erro ao adicionar produto ao carrinho.");
             if (axios.isAxiosError(error) && error.response?.status === 401) {
-               ;
+                ;
             }
         }
     }
@@ -137,7 +112,7 @@ export const ShopProvider = ({ children }: { children: React.ReactNode }) => {
             });
 
             if (response.data.success) {
-                setCart(response.data.cart);
+                await refetchProductCart();
                 toast.success("Produto removido do carrinho!")
             } else {
                 toast.error("Erro ao remover produto do carrinho!")
@@ -146,70 +121,27 @@ export const ShopProvider = ({ children }: { children: React.ReactNode }) => {
         } catch (error) {
             toast.error("Erro ao remover produto.");
             if (axios.isAxiosError(error) && error.response?.status === 401) {
-               ;
+                ;
             }
         }
     }
 
     const totalItems = () => {
-        let total = 0;
-        cart?.forEach((item: CartItem) => {
-            const product = products?.find(product => product._id === item.productId);
-            if (product) {
-                total += product.price * item.quantity;
-            }
-        });
+        const total = sumCartTotal(cart);
         setTotalValue(total);
         return total;
     }
 
-    const gettinProducts = async () => {
-        try {
-            const response = await api.get('/api/products/list');
-
-            if (response.data.success) {
-                setProducts(response.data.products);
-                setLatestProducts(response.data.products.slice(0, 10));
-                setBestSallers(response.data.products.filter((product: ProductProps) => product.bestseller).slice(0, 5));
-            }
-        } catch (error) {
-            toast.error("Erro ao carregar produtos.");
-
-        }
-    }
-
-    const getProductsCart = async () => {
-        // Verificações mais rigorosas
+    useEffect(() => {
         if (!authenticated) {
+            setCart([]);
             return;
         }
 
-        try {
-
-
-            const response = await api.post('/api/cart/items', {}, {
-
-            });
-
-            if (response.data.success) {
-                setCart(response.data.cart || []);
-
-            }
-        } catch (error: unknown) {
-            if (axios.isAxiosError(error)) {
-
-
-                if (error.response?.status === 401) {
-                   ;
-                }
-            }
+        if (fetchedProductCart) {
+            setCart(fetchedProductCart);
         }
-    };
-
-    // Carrega produtos uma vez ao inicializar
-    useEffect(() => {
-        gettinProducts();
-    }, []);
+    }, [authenticated, fetchedProductCart]);
 
     useEffect(() => {
         const raw = localStorage.getItem("selectedShipping");
@@ -224,36 +156,19 @@ export const ShopProvider = ({ children }: { children: React.ReactNode }) => {
         }
     }, []);
 
-
     useEffect(() => {
-        if (authenticated) {
-            const timeoutId = setTimeout(() => {
-                getProductsCart();
-            }, 100);
-
-            return () => clearTimeout(timeoutId);
-        }
-    }, [authenticated]);
-
-    // Recalcula total quando cart ou products mudam
-    useEffect(() => {
-        if (cart.length > 0 && products.length > 0) {
-            totalItems();
-        }
-    }, [cart, products]);
+        setTotalValue(sumCartTotal(cart));
+    }, [cart]);
 
     return (
         <ShopContext.Provider value={{
             currency, setCurrency,
-            fee, setFee, products,
-            latesteProducts, setLatestProducts,
-            bestSallers, setBestSallers,
+            fee, setFee,
             search, setSearch, setShowSearch, showSearch,
             cart, setCart, addToCart, removeProduct, totalItems, setTotalValue, totalValue,
-            gettinProducts, feeId, setFeeId, cartToggle, setCartToggle,
+            feeId, setFeeId, cartToggle, setCartToggle,
         }}>
             {children}
         </ShopContext.Provider>
-    );  
+    );
 };
-// ...existing code...
