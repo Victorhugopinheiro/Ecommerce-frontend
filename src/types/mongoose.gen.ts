@@ -124,6 +124,7 @@ export type Product = {
   bestseller?: boolean;
   date: number;
   reviews: any[];
+  franchise?: string;
   _id: string;
 };
 

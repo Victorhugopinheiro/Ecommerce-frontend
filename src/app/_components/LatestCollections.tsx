@@ -4,12 +4,15 @@ import { useContext } from "react"
 import ImgModel from "../../components/imgModel"
 import Tittle from "../../components/Tittle"
 import { ShopContext } from "../../context/ShopContext"
+import type { ShowcaseItem } from "@/hooks/gettingHomeShowcase"
 
 
-function LastestsCollections() {
+function LastestsCollections({ products }: { products: ShowcaseItem[] }) {
+    const { currency } = useContext(ShopContext)!
 
-    const {  currency, latesteProducts } = useContext(ShopContext)!
-    console.log(latesteProducts)
+    if (products.length === 0) {
+        return null
+    }
 
     return (
         <div className="my-8">
@@ -26,15 +29,14 @@ function LastestsCollections() {
 
 
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 mt-10">
-                {latesteProducts!.map((product) => (
+                {products.map((product) => (
                     <ImgModel
                         key={product._id}
-                        url={product.image[0]}
+                        url={product.image}
                         title={product.name}
                         price={String(product.price)}
                         currency={currency}
                         id={product._id}
-                        oldPrice={String(product.price)}
                     />
                 ))}
             </div>

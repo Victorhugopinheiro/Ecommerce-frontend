@@ -6,19 +6,20 @@ import type { CartItem } from "@/context/ShopContext";
 
 type ProductCartResponse = {
     success: boolean;
-    productCart: CartItem[];
+    cart: CartItem[];
 };
 
 
-export function useGettingProductCartHook() {
+export function useGettingProductCartHook(enabled: boolean) {
     return useQuery({
         queryKey: ['getting-product-cart'],
+        enabled,
         queryFn: async () => {
             const response = await api.post<ProductCartResponse>('/api/cart/items');
-            if (!response.data.success) {
+            if (!response.data.success || !Array.isArray(response.data.cart)) {
                 throw new Error("Erro ao carregar produto do carrinho.");
             }
-            return response.data.productCart;
+            return response.data.cart;
         }
     })
 }
