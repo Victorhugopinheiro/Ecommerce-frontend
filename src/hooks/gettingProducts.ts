@@ -11,7 +11,6 @@ export function useGettingProductsHook() {
     return useQuery({
         queryKey: ["getting-products"],
         queryFn: async () => {
-            console.log( "Heloooo")
             const response = await api.get<ProductsListResponse>("/api/products/list");
 
             
