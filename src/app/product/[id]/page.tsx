@@ -22,5 +22,5 @@ async function ProductById({
 
   console.log("productId", productId);
 
-  return <ProductContent className="bg-amber-300" productId={productId} />;
+  return <ProductContent productId={productId} />;
 }
