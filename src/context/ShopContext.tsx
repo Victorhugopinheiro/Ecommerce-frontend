@@ -7,6 +7,8 @@ import { AuthContext } from "./authContext";
 import axios from "axios";
 import { useGettingProductCartHook } from "@/hooks/GettingProductCart";
 import { useAddProductCartHook } from "@/hooks/AddProductCart";
+import { useGettingProductsHook } from "@/hooks/gettingProducts";
+import { Product } from "@/types/mongoose.gen";
 
 export interface CartItem {
     productId: string;
@@ -45,6 +47,8 @@ interface ShopContextType {
 
     cartToggle: boolean;
     setCartToggle: (toggle: boolean) => void;
+
+    fetchedProducts?: Product[];
 }
 
 function sumCartTotal(items: CartItem[]): number {
@@ -67,6 +71,8 @@ export const ShopProvider = ({ children }: { children: React.ReactNode }) => {
     const { data: fetchedProductCart, refetch: refetchProductCart } = useGettingProductCartHook(authenticated);
 
     const { mutate: addToCartMutation } = useAddProductCartHook();
+
+    const { data: fetchedProducts } = useGettingProductsHook();
 
     const [currency, setCurrency] = useState<string>("R$");
     const [fee, setFee] = useState<string>("0");
@@ -166,7 +172,7 @@ export const ShopProvider = ({ children }: { children: React.ReactNode }) => {
             fee, setFee,
             search, setSearch, setShowSearch, showSearch,
             cart, setCart, addToCart, removeProduct, totalItems, setTotalValue, totalValue,
-            feeId, setFeeId, cartToggle, setCartToggle,
+            feeId, setFeeId, cartToggle, setCartToggle, fetchedProducts
         }}>
             {children}
         </ShopContext.Provider>
